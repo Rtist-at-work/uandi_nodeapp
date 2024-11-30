@@ -5,7 +5,11 @@ require('dotenv').config();
 const connect = ()=>{
     const url = process.env.MONGO_URI;
     try{
-        mongoose.connect(url);
+        mongoose.connect(url,{
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            ssl: true,
+          });
     }
     catch(err){
         console.log(err);
