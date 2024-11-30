@@ -1,0 +1,30 @@
+name - Deploy node application
+
+on: 
+    push : 
+        branches :
+            -main
+            
+jobs :
+    build:
+        runson: ubuntu-latest
+        steps :
+            -name : Checkout Source
+            uses : action/checkout@v4
+            -name: Login to docker hub
+            run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
+            -name : build docker image
+            run : docker build -t karthik160/uandi-backend .
+            -name : publish Image to docker hub
+            run : docker push karthik160/uandi-backend:latest
+
+deploy: 
+    needs: build
+    runs-on : aws-ec2
+    steps : 
+        -name : pull image from docker hub
+        run : docker pull karthik160/uandi-backend:latest
+        -name : pull image from docker hub
+        run : docker run -d -p 4000:4000 uandi-backend-container -e MONGO_PASSWORD='${{secrets.MONGO_PASSWORD}}' karthik160/uandi-backend
+
+
