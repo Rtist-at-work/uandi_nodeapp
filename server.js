@@ -110,7 +110,7 @@ io.on('connection', (socket) => {
       // Remove the socket ID from userSockets when the user disconnects
       if (userId) {
           delete userSockets[userId];
-          console.log(userSockets);
+          console.log(userSockets + "ok");
       }
   });
 });
