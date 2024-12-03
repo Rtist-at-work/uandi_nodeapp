@@ -100,7 +100,7 @@ io.on('connection', (socket) => {
 
   // Listen for order status updates
   socket.on('orderStatusUpdation', (data) => {
-      console.log(userSockets);
+      console.log(userSockets + "ok");
       orderStatusUpdation(socket, data,userSockets,io);
   });
 
