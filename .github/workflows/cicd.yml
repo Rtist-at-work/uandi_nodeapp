@@ -27,6 +27,8 @@ jobs:
     steps:
       - name: Pull Image from Docker Hub
         run: docker pull karthik160/uandi-backend:latest        
+      - name: remove old container from Docker Hub
+        run: docker rm -f uandi-backend-container       
 
       - name: Run Container from Docker Image
         run: docker run -d -p 4000:4000 --name uandi-backend-container -e MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }} karthik160/uandi-backend
