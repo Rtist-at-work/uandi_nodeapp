@@ -155,6 +155,7 @@ router.patch(
   secureRoute.requireAuth,
   UserController.updateAddress
 );
+router.post("/create-razorpay-order", secureRoute.requireAuth, UserController.razorpay);
 router.post("/place-order", secureRoute.requireAuth, UserController.placeOrder);
 router.post("/addReview", secureRoute.requireAuth, UserController.addReview);
 router.get("/my-orders", secureRoute.requireAuth, UserController.getMyOrders);

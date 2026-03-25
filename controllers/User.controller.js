@@ -1,5 +1,12 @@
 const userService = require("../services/User.services");
 
+const Razorpay = require("razorpay");
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
+
 const userController = {
   // adding wishlist
 
@@ -63,7 +70,7 @@ const userController = {
 
       const { user, token } = await userService.verifyOtp(
         data.mobile,
-        data.otp
+        data.otp,
       );
 
       res.cookie("auth_token", token, {
@@ -124,7 +131,7 @@ const userController = {
         userId,
         productId,
         size,
-        quantity
+        quantity,
       );
 
       res
@@ -209,7 +216,7 @@ const userController = {
       const updatedAddress = await userService.updateUserAddress(
         userId,
         editingAddressId,
-        newAddress
+        newAddress,
       );
       res.status(200).json({
         success: true,
@@ -282,7 +289,7 @@ const userController = {
         userId,
         productId,
         rating,
-        comment
+        comment,
       );
 
       res.status(200).json({
@@ -344,7 +351,7 @@ const userController = {
 
       const response = await userService.saveCartSummaryService(
         userId,
-        summary
+        summary,
       );
 
       res.status(200).json({
@@ -389,19 +396,17 @@ const userController = {
       console.log(req.body);
 
       if (!productId || !size || quantity == null) {
-        return res
-          .status(400)
-          .json({
-            status: 400,
-            message: "productId, size & quantity required",
-          });
+        return res.status(400).json({
+          status: 400,
+          message: "productId, size & quantity required",
+        });
       }
 
       const updatedCart = await userService.updateCart(
         userId,
         productId,
         size,
-        quantity
+        quantity,
       );
 
       res.status(200).json({ status: 200, cart: updatedCart });
@@ -422,12 +427,29 @@ const userController = {
         message: result.message,
       });
     } catch (error) {
-      console.log(error)
+      console.log(error);
       return res.status(500).json({
         success: false,
         message: "Logout failed",
       });
     }
+  },
+
+  //  payment gateway
+
+  // payment gateway
+
+  razorpay: async (req, res) => {
+    const { amount } = req.body;
+
+    const options = {
+      amount, // in paise
+      currency: "INR",
+      receipt: "receipt_order_" + Date.now(),
+    };
+
+    const order = await razorpay.orders.create(options);
+    res.json(order);
   },
 };
 
