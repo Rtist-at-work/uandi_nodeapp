@@ -27,7 +27,7 @@ const userService = {
       await userRepository.sendOtp(mobile, otp);
 
       // Send SMS (uncomment for real SMS)
-      await sendSms(mobile, otp);
+      // await sendSms(mobile, otp);
 
       return {
         success: true,
