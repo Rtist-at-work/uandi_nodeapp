@@ -26,7 +26,7 @@ app.use(cookieParser());
 // ];
 
 app.use(cors({
-  origin: "*",
+  origin: "https://uandik.netlify.app",
   // function (origin, callback) {
   //   if (!origin || allowedOrigins.includes(origin)) {
   //     callback(null, true);
