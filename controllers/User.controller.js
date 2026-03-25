@@ -74,11 +74,11 @@ const userController = {
       );
 
       res.cookie("auth_token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+  httpOnly: true,
+  secure: true,          // MUST be true in production
+  sameSite: "none",      // 🔥 key fix
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
 
       return res.json({
         success: true,
