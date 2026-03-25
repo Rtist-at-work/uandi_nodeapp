@@ -15,27 +15,16 @@ app.use(express.json());
 app.use(cookieParser());
 
 // origin cors
-// const allowedOrigins = [
-//   "http://localhost:5174",
-//   // "http://localhost:5175",
-//   "http://localhost:5173",
-//   "http://localhost:4000",
-//   "http://172.19.160.1",
-//   "https://www.uandi.co",
-//   "https://127.0.0.1:5000"
-// ];
 
-app.use(cors({
+const corsOptions = {
   origin: "https://uandik.netlify.app",
-  // function (origin, callback) {
-  //   if (!origin || allowedOrigins.includes(origin)) {
-  //     callback(null, true);
-  //   } else {
-  //     callback(new Error("Not allowed by CORS"));
-  //   }
-  // },
-  credentials: true
-}));
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // 👈 important
 
 // routes
 app.use('/api', apiRoutes);
