@@ -1,38 +1,14 @@
-import nodemailer from "nodemailer";
-import dns from "dns";
+import { Resend } from "resend";
+import dotenv from "dotenv";
+dotenv.config();
 
-// ✅ Force IPv4 (fix Render + Gmail issue)
-dns.setDefaultResultOrder("ipv4first");
-
-// ✅ Create transporter ONCE (not inside function)
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true, // SSL
-  family: 4,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  connectionTimeout: 15000,
-  greetingTimeout: 10000,
-  socketTimeout: 20000,
-});
-
-// ✅ Optional but recommended (fail fast if config wrong)
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("SMTP Connection Error:", error);
-  } else {
-    console.log("SMTP Server is ready");
-  }
-});
+const resend = new Resend(process.env.RESEND_APIKEY);
 
 export const sendEmail = async (to, otp) => {
   try {
-    const mailOptions = {
-      from: `"UandIK" <${process.env.EMAIL_USER}>`,
-      to,
+    const response = await resend.emails.send({
+      from: process.env.EMAIL_USER, // default test sender
+      to: to,
       subject: "Verification Code",
       html: `
 <div style="font-family: Arial, sans-serif; background-color: #f4f6f8; padding: 20px;">
@@ -73,13 +49,10 @@ export const sendEmail = async (to, otp) => {
   </div>
 </div>
 `,
-    };
+    });
 
-    const info = await transporter.sendMail(mailOptions);
-
-    console.log("Email sent:", info.messageId);
+    console.log("Email sent:", response);
     return true;
-
   } catch (error) {
     console.error("Send OTP Error:", error);
     throw new Error("Failed to send email");
