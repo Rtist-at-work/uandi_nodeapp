@@ -27,7 +27,7 @@ const userRepository = {
         updatedUser = await User.findByIdAndUpdate(
           userId,
           { $pull: { wishlist: productId } },
-          { new: true }
+          { new: true },
         ).lean();
       } else {
         message = "Added to wishlist";
@@ -35,7 +35,7 @@ const userRepository = {
         updatedUser = await User.findByIdAndUpdate(
           userId,
           { $addToSet: { wishlist: productId } },
-          { new: true }
+          { new: true },
         ).lean();
       }
 
@@ -47,8 +47,8 @@ const userRepository = {
 
   // verify otp
 
-  verifyOtp: async (mobile, otp) => {
-    return await Otp.findOne({ mobile, otp });
+  verifyOtp: async (email, otp) => {
+    return await Otp.findOne({ email, otp });
   },
 
   // find product by id
@@ -157,7 +157,7 @@ const userRepository = {
           {
             $inc: { "cart.$.quantity": quantity },
           },
-          { new: true }
+          { new: true },
         );
       } else {
         // Add new cart item
@@ -168,7 +168,7 @@ const userRepository = {
               cart: { productId, size, quantity },
             },
           },
-          { new: true }
+          { new: true },
         );
       }
     } catch (err) {
@@ -191,7 +191,7 @@ const userRepository = {
           const product = await Product.findById(item.productId).lean();
           console.log(product);
           return { ...item, product: product || null };
-        })
+        }),
       );
 
       const cartTotal = cart.reduce((sum, item) => {
@@ -282,7 +282,7 @@ const userRepository = {
             },
           },
         },
-        { new: true, runValidators: true }
+        { new: true, runValidators: true },
       );
 
       if (!updatedUser) return null;
@@ -308,7 +308,7 @@ const userRepository = {
               ...newAddress,
             },
           },
-        }
+        },
       );
 
       if (result.matchedCount === 0) {
@@ -378,7 +378,7 @@ const userRepository = {
       return await User.findByIdAndUpdate(
         userId,
         { cart: cartItems },
-        { new: true }
+        { new: true },
       );
     } catch (err) {
       const error = new Error("Failed to update user cart");
@@ -469,15 +469,15 @@ const userRepository = {
 
   // sending otp
 
-  sendOtp: async (mobile, otp) => {
+  sendOtp: async (email, otp) => {
     try {
       // Remove old OTP for same mobile (avoid duplicates)
-      await Otp.deleteMany({ mobile });
+      await Otp.deleteMany({ email });
 
       const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes validity
 
       const result = await Otp.create({
-        mobile,
+        email,
         otp,
         expiresAt,
       });
@@ -500,7 +500,7 @@ const userRepository = {
           category: 1,
           style: 1,
           description: 1,
-        }
+        },
       );
 
       if (!allProducts.length) return [];
@@ -529,7 +529,7 @@ const userRepository = {
       const catStyleMatched = results.filter(
         (p) =>
           p.category.toLowerCase().includes(term) ||
-          p.style.toLowerCase().includes(term)
+          p.style.toLowerCase().includes(term),
       );
 
       if (catStyleMatched.length > 0) {
@@ -544,7 +544,7 @@ const userRepository = {
 
       // 2️⃣ If description match → return product names
       const descMatched = results.filter((p) =>
-        p.description.toLowerCase().includes(term)
+        p.description.toLowerCase().includes(term),
       );
 
       if (descMatched.length > 0) {
@@ -576,7 +576,7 @@ const userRepository = {
       return await User.findByIdAndUpdate(
         userId,
         { cartSummary: summaryData },
-        { new: true }
+        { new: true },
       );
     } catch (err) {
       throw new Error("Error saving cart summary");
@@ -587,10 +587,13 @@ const userRepository = {
     try {
       const user = await User.findById(userId);
       if (!user) throw new Error("User not found");
-
+      console.log("user.cart :", user.cart);
+      console.log(" productId, size, quantity :", productId, size, quantity);
       // Find cart item
       const index = user.cart.findIndex(
-        (c) => c.productId.toString() === productId && c.size === size
+        (c) =>
+          c.productId.toString() === productId &&
+          c.size.trim().toUpperCase() === size.trim().toUpperCase(),
       );
 
       if (index === -1) {
@@ -599,9 +602,15 @@ const userRepository = {
 
       // Update or remove based on quantity
       if (quantity <= 0) {
-        user.cart.splice(index, 1); // remove
+        user.cart = user.cart.filter(
+          (c) =>
+            !(
+              c.productId.toString() === productId &&
+              c.size.trim().toUpperCase() === size.trim().toUpperCase()
+            ),
+        );
       } else {
-        user.cart[index].quantity = quantity; // update qty
+        user.cart[index].quantity = quantity;
       }
 
       await user.save();

@@ -2,6 +2,7 @@ const User = require("../models/user.model");
 const Coupon = require("../models/coupon.model");
 const userRepository = require("../repositories/User.repositories");
 const jwt = require("jsonwebtoken");
+const { sendEmail } = require("../middlewares/SendEmail");
 require("dotenv").config();
 
 const userService = {
@@ -18,21 +19,21 @@ const userService = {
 
   // sending otp
 
-  sendOtp: async (mobile) => {
+  sendOtp: async (email) => {
     try {
       // Generate random 6-digit OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       console.log('otp :', otp)
       // Save in DB
-      await userRepository.sendOtp(mobile, otp);
+      await userRepository.sendOtp(email, otp);
 
       // Send SMS (uncomment for real SMS)
-      // await sendSms(mobile, otp);
+      await sendEmail(email, otp);
 
       return {
         success: true,
         message: "OTP sent successfully",
-        mobile,
+        email,
       };
     } catch (err) {
       throw err;
@@ -41,23 +42,23 @@ const userService = {
 
   // verify otp
 
-  verifyOtp: async (mobile, otp) => {
-    const record = await userRepository.verifyOtp(mobile, otp);
+  verifyOtp: async (email, otp) => {
+    const record = await userRepository.verifyOtp(email, otp);
 
     if (!record) {
       throw new Error("Invalid or expired OTP");
     }
 
     // Find existing or create new user
-    let user = await User.findOne({ mobile });
+    let user = await User.findOne({ email });
 
     if (!user) {
-      user = await User.create({ mobile });
+      user = await User.create({ email });
     }
 
     // Create token
     const token = jwt.sign(
-      { id: user._id, mobile: user.mobile, role: user.role },
+      { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );

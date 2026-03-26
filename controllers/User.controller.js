@@ -42,11 +42,11 @@ const userController = {
     try {
       const { data } = req.body;
 
-      if (!data.mobile) {
-        return res.status(400).json({ message: "Mobile number is required" });
+      if (!data.email) {
+        return res.status(400).json({ message: "Email Id is required" });
       }
 
-      const result = await userService.sendOtp(data.mobile);
+      const result = await userService.sendOtp(data.email);
 
       return res
         .status(200)
@@ -68,17 +68,14 @@ const userController = {
       if (!data.otp)
         return res.status(400).json({ message: "Otp is required" });
 
-      const { user, token } = await userService.verifyOtp(
-        data.mobile,
-        data.otp,
-      );
+      const { user, token } = await userService.verifyOtp(data.email, data.otp);
 
       res.cookie("auth_token", token, {
-  httpOnly: true,
-  secure: true,          // MUST be true in production
-  sameSite: "none",      // 🔥 key fix
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-});
+        httpOnly: true,
+        secure: true, // MUST be true in production
+        sameSite: "none", // 🔥 key fix
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
 
       return res.json({
         success: true,
@@ -86,7 +83,12 @@ const userController = {
         user,
       });
     } catch (err) {
-      res.status(500).json({ error: err, message: "Login failed" });
+      console.log(err);
+
+      return res.status(400).json({
+        success: false,
+        message: err.message || "Something went wrong",
+      });
     }
   },
 
@@ -157,6 +159,7 @@ const userController = {
       return res.status(500).json({
         success: false,
         error: err,
+        message: err.message || "Failed to load cart. Please try again.",
       });
     }
   },

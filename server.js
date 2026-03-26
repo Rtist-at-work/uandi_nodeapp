@@ -1,10 +1,9 @@
 const express = require("express");
-const cors = require('cors');
-const apiRoutes = require('./routes/api.routes');
-const connect = require('./db');
+const cors = require("cors");
+const apiRoutes = require("./routes/api.routes");
+const connect = require("./db");
 const cookieParser = require("cookie-parser");
-require('dotenv').config();
- 
+require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT;
@@ -38,13 +37,7 @@ app.use(cors({
   credentials: true
 }));
 
-
-
-
-
-
-// routes
-app.use('/api', apiRoutes);
+app.use("/api", apiRoutes);
 
 // test route
 app.get("/", (req, res) => {
