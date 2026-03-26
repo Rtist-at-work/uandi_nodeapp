@@ -22,18 +22,27 @@ const userService = {
   sendOtp: async (email) => {
     try {
       // Generate random 6-digit OTP
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      console.log('otp :', otp)
+      // const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      // console.log('otp :', otp)
+
       // Save in DB
-      await userRepository.sendOtp(email, otp);
+      const user = await userRepository.sendOtp(email);
 
       // Send SMS (uncomment for real SMS)
-      await sendEmail(email, otp);
+      // await sendEmail(email, otp);
+
+      // ✅ Generate token here
+      const token = jwt.sign(
+        { id: user._id, email: user.email },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" },
+      );
 
       return {
         success: true,
         message: "OTP sent successfully",
         email,
+        token, // pass token to controller
       };
     } catch (err) {
       throw err;
@@ -60,7 +69,7 @@ const userService = {
     const token = jwt.sign(
       { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     return { user, token };
@@ -94,7 +103,7 @@ const userService = {
         userId,
         productId,
         size,
-        quantity
+        quantity,
       );
 
       return {
@@ -167,7 +176,7 @@ const userService = {
       const updatedAddress = await userRepository.updateAddress(
         userId,
         editingAddressId,
-        newAddress
+        newAddress,
       );
       return updatedAddress;
     } catch (error) {
@@ -279,7 +288,7 @@ const userService = {
     try {
       const hasOrdered = await userRepository.checkIfUserOrderedProduct(
         userId,
-        productId
+        productId,
       );
 
       if (!hasOrdered) {
@@ -322,7 +331,7 @@ const userService = {
       const catStyleMatched = results.filter(
         (p) =>
           p.category.toLowerCase().includes(term) ||
-          p.style.toLowerCase().includes(term)
+          p.style.toLowerCase().includes(term),
       );
 
       if (catStyleMatched.length > 0) {
@@ -336,7 +345,7 @@ const userService = {
 
       // Check description match → return only name
       const descMatched = results.filter((p) =>
-        p.description.toLowerCase().includes(term)
+        p.description.toLowerCase().includes(term),
       );
 
       if (descMatched.length > 0) {
@@ -374,7 +383,7 @@ const userService = {
 
       if (!user) throw new Error("User not found");
       const coupon = await userRepository.findCouponByCode(
-        user.cartSummary.appliedCoupon
+        user.cartSummary.appliedCoupon,
       );
 
       return {
@@ -395,7 +404,7 @@ const userService = {
         userId,
         productId,
         size,
-        quantity
+        quantity,
       );
       return updatedCart;
     } catch (err) {

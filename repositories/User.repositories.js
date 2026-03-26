@@ -469,24 +469,32 @@ const userRepository = {
 
   // sending otp
 
-  sendOtp: async (email, otp) => {
-    try {
-      // Remove old OTP for same mobile (avoid duplicates)
-      await Otp.deleteMany({ email });
+ sendOtp: async (email) => {
+  try {
+    // Remove old OTP for same mobile (avoid duplicates)
+    // await Otp.deleteMany({ email });
 
-      const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes validity
+    // const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes validity
 
-      const result = await Otp.create({
-        email,
-        otp,
-        expiresAt,
-      });
+    // const result = await Otp.create({
+    //   email,
+    //   otp,
+    //   expiresAt,
+    // });
 
-      return result;
-    } catch (err) {
-      throw err;
+    // ✅ Check if user exists
+    let user = await User.findOne({ email });
+
+    // ✅ If not, create user
+    if (!user) {
+      user = await User.create({ email });
     }
-  },
+
+    return user;
+  } catch (err) {
+    throw err;
+  }
+},
 
   // search result
 

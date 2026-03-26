@@ -40,25 +40,35 @@ const userController = {
 
   sendOtp: async (req, res) => {
     try {
-      const { data } = req.body;
+      const { email } = req.body;
 
-      if (!data.email) {
+      if (!email) {
         return res.status(400).json({ message: "Email Id is required" });
       }
 
-      const result = await userService.sendOtp(data.email);
+      const result = await userService.sendOtp(email);
 
-      return res
-        .status(200)
-        .json({ result: result, message: "Otp sent successfully" });
+      // ✅ Set cookie here (correct place)
+      res.cookie("auth_token", result.token, {
+        httpOnly: true,
+        secure: true, // production (HTTPS)
+        sameSite: "none", // required for cross-origin
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      return res.status(200).json({
+        message: "Logged In Successfully",
+        // message: "Otp sent successfully",
+        email: result.email,
+      });
     } catch (err) {
       console.error("Send OTP Error:", err);
-      return res
-        .status(500)
-        .json({ error: err, message: "Sending Otp failed" });
+      return res.status(500).json({
+        error: err,
+        message: "Sending Otp failed",
+      });
     }
   },
-
   // otp verification
 
   verifyOtp: async (req, res) => {
