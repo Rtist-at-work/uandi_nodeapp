@@ -377,8 +377,6 @@ const userController = {
 
       const response = await userService.getCartSummary(userId);
 
-      console.log("res :", response);
-
       res.status(200).json(response);
     } catch (err) {
       console.error(err);

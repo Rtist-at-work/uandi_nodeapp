@@ -1,21 +1,25 @@
-// utils/sendEmail.js
 import nodemailer from "nodemailer";
 
 export const sendEmail = async (to, otp) => {
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587, // ✅ IMPORTANT (NOT 465)
+    secure: false, // ✅ MUST be false for 587
     auth: {
       user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS, // use App Password (important)
+      pass: process.env.EMAIL_PASS, // ✅ App Password only
     },
+    tls: {
+      rejectUnauthorized: false, // ✅ helps in production (Render)
+    },
+    connectionTimeout: 10000, // optional (10s)
   });
 
   const mailOptions = {
     from: `"UandIK" <${process.env.EMAIL_USER}>`,
     to,
     subject: "Verification Code",
-    html: `
-<div style="font-family: Arial, sans-serif; background-color: #f4f6f8; padding: 20px;">
+    html: `<div style="font-family: Arial, sans-serif; background-color: #f4f6f8; padding: 20px;">
   <div style="max-width: 500px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
     
     <!-- Header -->
@@ -57,8 +61,7 @@ export const sendEmail = async (to, otp) => {
     </div>
 
   </div>
-</div>
-`,
+</div>`,
   };
 
   await transporter.sendMail(mailOptions);
